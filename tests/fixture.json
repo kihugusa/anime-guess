@@ -1,0 +1,12 @@
+{"v":1,"fetched":"test","source":"Invented titles for automated tests only, not real anime","cols":["id","romaji","english","year","season","format","episodes","genres","studio","source","score","popularity","tags"],"rows":[
+[1,"Hoshi no Kagi","Key of Stars",2014,"Spring","TV",24,["Adventure","Fantasy"],"Studio Alpha","Manga",82,900000,["Magic","Travel"]],
+[2,"Kawa no Oto","Sound of the River",2018,"Fall","TV",12,["Drama","Slice of Life"],"Studio Beta","Original",79,600000,["Music","Rural"]],
+[3,"Tetsu Yume","Iron Dream",2009,"Winter","TV",51,["Action","Sci-Fi"],"Studio Gamma","Light novel",74,750000,["Mecha","War"]],
+[4,"Kaze Tachi","Wind Riders",2021,"Summer","MOVIE",1,["Adventure","Drama"],"Studio Alpha","Original",86,500000,["Flight"]],
+[5,"Neko Kissa",null,2016,"Spring","TV",13,["Comedy","Slice of Life"],"Studio Delta","4 koma manga",71,300000,["Cats","Cafe"]],
+[6,"Yami no Ken","Blade of Night",2019,"Spring","TV",26,["Action","Fantasy"],"Studio Gamma","Manga",84,1200000,["Swordplay","Demons"]],
+[7,"Sora Koukou","Sky High School",2012,"Fall","TV",25,["Comedy","Romance"],"Studio Beta","Manga",76,450000,["School"]],
+[8,"Umi Densetsu","Sea Legend",1998,"Spring","TV",26,["Adventure","Mystery"],"Studio Epsilon","Novel",80,350000,["Pirates"]],
+[9,"Kage Bunko","Shadow Library",2023,"Winter","ONA",10,["Mystery","Supernatural"],"Studio Delta","Web manga",77,200000,["Books"]],
+[10,"Hikari Shoujo","Girl of Light",2015,"Summer","TV",12,["Drama","Fantasy","Romance"],"Studio Alpha","Visual novel",73,400000,["Time travel"]]
+]}
