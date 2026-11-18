@@ -1,5 +1,5 @@
 name: Refresh anime data
-# Pulls the most popular anime (facts only) from AniList, rebuilds the site into docs/ and commits.
+# Pulls the most popular anime and characters (facts only) from AniList, rebuilds the site into docs/ and commits.
 on:
   workflow_dispatch:
   schedule:
@@ -15,9 +15,14 @@ jobs:
         with:
           node-version: 20
       - name: Fetch from AniList
-        run: node scripts/fetch_anime.mjs 30 > docs/anime.json
+        run: |
+          node scripts/fetch_anime.mjs 30 > docs/anime.json
+          mkdir -p docs/characters
+          node scripts/fetch_characters.mjs 30 > docs/characters/characters.json
       - name: Validate
-        run: node tests/validate.mjs docs/anime.json
+        run: |
+          node tests/validate.mjs docs/anime.json
+          node tests/validate_chars.mjs docs/characters/characters.json
       - name: Build site
         run: |
           pip install --quiet pillow

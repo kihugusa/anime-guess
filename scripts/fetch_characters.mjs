@@ -10,7 +10,7 @@ const Q = `query ($page: Int) { Page(page: $page, perPage: 50) { pageInfo { hasN
   characters(sort: FAVOURITES_DESC) {
     id name { full native alternative } gender age dateOfBirth { month day } bloodType favourites
     description(asHtml: false)
-    media(type: ANIME, sort: POPULARITY_DESC, perPage: 3) { edges { characterRole
+    media(type: ANIME, sort: POPULARITY_DESC, perPage: 8) { edges { characterRole
       voiceActors(language: JAPANESE, sort: RELEVANCE) { name { full } }
       node { id title { romaji english } format seasonYear startDate { year } genres popularity isAdult
         studios(isMain: true) { nodes { name } } } } } } } }`;
@@ -33,7 +33,10 @@ const rows = []; let rank = 0;
 for (let n = 1; n <= PAGES; n++) {
   const p = await page(n);
   for (const c of p.characters) {
-    const edges = (c.media && c.media.edges || []).filter(e => e.node && !e.node.isAdult);
+    // Best-known show: the most popular one where they are main or supporting cast; cameos only as a last resort.
+    const ROLE = { MAIN: 0, SUPPORTING: 0, BACKGROUND: 1 };
+    const edges = (c.media && c.media.edges || []).filter(e => e.node && !e.node.isAdult)
+      .map((e, i) => ({ e, i })).sort((a, b) => ((ROLE[a.e.characterRole] ?? 3) - (ROLE[b.e.characterRole] ?? 3)) || a.i - b.i).map(x => x.e);
     if (!edges.length) continue;
     const e = edges[0], m = e.node;
     const year = m.seasonYear || (m.startDate && m.startDate.year) || null;
@@ -43,7 +46,7 @@ for (let n = 1; n <= PAGES; n++) {
     rows.push([c.id, c.name.full, (c.name.alternative || []).filter(Boolean).slice(0, 4), c.gender || null, c.age || null,
       c.dateOfBirth && c.dateOfBirth.month || null, c.dateOfBirth && c.dateOfBirth.day || null, c.bloodType || null,
       c.favourites, rank, e.characterRole || null, m.id, series, (m.format || '').replace('_', ' ') || null, year,
-      (m.studios.nodes[0] || {}).name || null, m.genres || [], va, edges.slice(1).map(x => x.node.title.english || x.node.title.romaji)]);
+      (m.studios.nodes[0] || {}).name || null, m.genres || [], va, edges.slice(1, 4).map(x => x.node.title.english || x.node.title.romaji)]);
     if (NOTES && rank <= NOTES) {
       process.stderr.write('NOTE\t' + JSON.stringify({ id: c.id, rank, name: c.name.full, series, notes: clean(c.description).slice(0, 700) }) + '\n');
     }

@@ -1,0 +1,10 @@
+{"v":1,"fetched":"test","source":"Invented characters for automated tests only, not real anime","cols":["id","name","alt","gender","age","month","day","blood","favourites","rank","role","seriesId","series","format","year","studio","genres","va","other"],"rows":[
+[901,"Aoi Tsukimura",["Moon Girl"],"Female","17",3,14,"A",90000,1,"MAIN",1,"Key of Stars","TV",2014,"Studio Alpha",["Adventure","Fantasy"],"Haruka Tanaka",["Key of Stars 2"]],
+[902,"Ren Kurogane",[],"Male","19",11,2,"O",85000,2,"MAIN",3,"Iron Dream","TV",2009,"Studio Gamma",["Action","Sci-Fi"],"Kenji Mori",[]],
+[903,"Hana",["Little Hana"],"Female",null,null,null,null,70000,3,"SUPPORTING",1,"Key of Stars","TV",2014,"Studio Alpha",["Adventure","Fantasy"],"Haruka Tanaka",[]],
+[904,"Daichi Oyama",[],"Male","34",7,21,"B",60000,4,"SUPPORTING",6,"Blade of Night","TV",2019,"Studio Gamma",["Action","Fantasy"],"Kenji Mori",[]],
+[905,"Yuki Shirasawa",[],"Female","16",12,25,"AB",50000,5,"MAIN",7,"Sky High School","TV",2012,"Studio Beta",["Comedy","Romance"],"Mio Sato",[]],
+[906,"Professor Kuma",[],"Male",null,4,1,null,40000,6,"SUPPORTING",8,"Sea Legend","TV",1998,"Studio Epsilon",["Adventure","Mystery"],null,[]],
+[907,"Mika Hoshino",[],"Female","15",2,9,"A",30000,7,"MAIN",4,"Wind Riders","MOVIE",2021,"Studio Alpha",["Adventure","Drama"],"Rina Ito",[]],
+[908,"Sora Kageyama",[],"Male","18",3,30,"O",20000,8,"MAIN",9,"Shadow Library","ONA",2023,"Studio Delta",["Mystery","Supernatural"],"Taro Abe",[]]
+]}

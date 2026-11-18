@@ -1,6 +1,6 @@
 # Anime Guess
 
-Play: https://kihugusa.github.io/anime-guess/
+Play: https://kihugusa.github.io/anime-guess/ · Character Guess: https://kihugusa.github.io/anime-guess/characters/
 
 A daily anime guessing game. Pick any title and the app compares it with the hidden answer on eight facts:
 
@@ -16,6 +16,25 @@ A daily anime guessing game. Pick any title and the app compares it with the hid
 - **Daily:** everyone gets the same answer each day. It comes from the 400 most popular TV series and films since 1990, in a fixed shuffled order with no repeats.
 - **Endless:** a new random answer every round.
 - **Stats:** win rate, streak and how many guesses each win took. Progress stays in the browser.
+
+## Character Guess (`/characters/`)
+
+Guess the hidden character from a seven-step clue ladder. It starts hard and gets easier: debut and role, trivia, genres and studio, Japanese voice actor, more trivia, initials, then the show. Each wrong guess or **Next clue** unlocks one more step. Solving it with *n* clues showing scores 8 − *n* points.
+
+Every guess is compared with the answer on seven facts:
+
+| Fact | Close (amber) when |
+|---|---|
+| Series | same studio (green for the same show) |
+| Debut year | within 2 years (arrow shows later or earlier) |
+| Popularity | within 25 places (↑ means the answer is more popular) |
+| Birthday | within one month |
+| Gender, role, voice actor | (match or no match only) |
+
+- **Daily:** answers come from the 150 most-favourited characters, each with two spoiler-free trivia lines in `src/trivia.json`. That trivia was written for this game, paraphrased from AniList notes, and never names the character or the show (`tests/validate_chars.mjs` checks this).
+- **Endless:** the top 600. Characters without trivia get fact-based clues instead.
+- **No artwork.** Each round ends with a link to the character's AniList page.
+- **Adding trivia:** run the *Character notes* workflow, which prints notes for the top N characters to its log. Write new lines into `src/trivia.json`.
 
 ## Data
 
