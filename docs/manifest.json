@@ -1,7 +1,7 @@
 {
   "name": "Anime Guess",
   "short_name": "Anime Guess",
-  "description": "Guess the daily anime from its studio, year, genres and more.",
+  "description": "Guess the daily anime and the daily character.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -30,6 +30,11 @@ h1{font:400 clamp(30px,8.5vw,42px)/1 "Dela Gothic One",Inter,sans-serif;margin:0
 .tabs{display:flex;background:var(--soft);border-radius:999px;padding:3px}
 .tabs button{border:0;background:none;padding:8px 14px;border-radius:999px;font-weight:600;font-size:14px;min-height:40px;cursor:pointer}
 .tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.games{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--soft);border-radius:16px;padding:4px;margin:0 0 12px}
+.games a{display:flex;align-items:center;justify-content:center;min-height:46px;border-radius:12px;font-weight:700;font-size:15.5px;color:var(--ink);text-decoration:none}
+.games a[aria-current=page]{color:#fff}
+.games a.shows[aria-current=page]{background:#e8380d}
+.games a.chars[aria-current=page]{background:#1d2a6b}
 .poster{position:relative;overflow:hidden;border-radius:20px;background:var(--red);color:#fff;padding:18px 18px 16px;margin-bottom:14px;min-height:150px}
 .poster::before{content:"";position:absolute;right:-60px;top:-70px;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,#fff 0 1.2px,transparent 1.6px) 0 0/9px 9px,#ff6a3d;opacity:.55}
 .poster::after{content:"";position:absolute;right:18px;top:20px;width:88px;height:88px;border-radius:50%;background:#fff;opacity:.92}
@@ -87,6 +92,7 @@ h1{font:400 clamp(30px,8.5vw,42px)/1 "Dela Gothic One",Inter,sans-serif;margin:0
 </head>
 <body>
 <div class="wrap">
+  <!--GAMES--><nav class="games" aria-label="Game"><a class="shows" href="./" aria-current="page" data-game="shows">Shows</a><a class="chars" href="./characters/"  data-game="characters">Characters</a></nav><!--/GAMES-->
   <header>
     <h1>Anime Guess</h1>
     <div class="tabs" role="group" aria-label="Mode"><button data-m="daily" aria-pressed="true">Daily</button><button data-m="endless" aria-pressed="false">Endless</button><button data-m="stats" aria-pressed="false">Stats</button></div>
@@ -103,7 +109,7 @@ h1{font:400 clamp(30px,8.5vw,42px)/1 "Dela Gothic One",Inter,sans-serif;margin:0
     <div class="legend"><span style="--c:var(--hit)">Match</span><span style="--c:var(--near)">Close</span><span style="--c:var(--miss)">No match</span><span>↑ answer is higher · ↓ lower</span></div>
   </div>
   <div id="stats" hidden></div>
-  <p class="credit">Data from <a href="https://anilist.co" target="_blank" rel="noopener">AniList</a>: titles and facts only. Not affiliated with AniList or any studio. <a href="characters/">New: Character Guess</a>.</p>
+  <p class="credit">Data from <a href="https://anilist.co" target="_blank" rel="noopener">AniList</a>: titles and facts only. Not affiliated with AniList or any studio.</p>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <!--DATA-->
@@ -239,7 +245,9 @@ function setMode(m) {
 }
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => setMode(b.dataset.m));
 
+document.querySelectorAll('.games a').forEach(a => a.addEventListener('click', () => { try { localStorage.setItem('ag:game', a.dataset.game); } catch (e) {} }));
 async function boot() {
+  try { if (!window.ANIME_DATA && !location.hash && localStorage.getItem('ag:game') === 'characters') { location.replace('characters/'); return; } } catch (e) {}
   let data = window.ANIME_DATA;
   if (!data) { try { data = await (await fetch('anime.json')).json(); } catch (e) { $('ptitle').textContent = 'Could not load data. Check your connection.'; return; } }
   ROWS = data.rows; ROWS.forEach(r => BYID.set(r[C.id], r)); POOL = AG.dailyPool(ROWS);

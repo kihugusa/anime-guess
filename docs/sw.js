@@ -1,6 +1,6 @@
 // Offline cache for Anime Guess. Bump VERSION when you ship changes.
-const VERSION = 'ag-v1';
-const FILES = ['./', './index.html', './anime.json', './manifest.json', './icons/icon-192.png'];
+const VERSION = 'ag-v2';
+const FILES = ['./', './index.html', './anime.json', './manifest.json', './icons/icon-192.png', './characters/', './characters/index.html', './characters/characters.json', './characters/trivia.json'];
 self.addEventListener('install', e => e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('ag-') && k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', e => {

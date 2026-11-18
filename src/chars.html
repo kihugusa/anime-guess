@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#1d2a6b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Character Guess">
+<meta name="apple-mobile-web-app-title" content="Anime Guess">
 <!--PWA_LINKS-->
-<title>Character Guess</title>
+<title>Anime Guess · Characters</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -30,6 +30,11 @@ h1{font:400 clamp(28px,8vw,40px)/1 "Dela Gothic One",Inter,sans-serif;margin:0;f
 .tabs{display:flex;background:var(--soft);border-radius:999px;padding:3px}
 .tabs button{border:0;background:none;padding:8px 14px;border-radius:999px;font-weight:600;font-size:14px;min-height:40px;cursor:pointer}
 .tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.games{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--soft);border-radius:16px;padding:4px;margin:0 0 12px}
+.games a{display:flex;align-items:center;justify-content:center;min-height:46px;border-radius:12px;font-weight:700;font-size:15.5px;color:var(--ink);text-decoration:none}
+.games a[aria-current=page]{color:#fff}
+.games a.shows[aria-current=page]{background:#e8380d}
+.games a.chars[aria-current=page]{background:#1d2a6b}
 .dossier{position:relative;overflow:hidden;border-radius:20px;background:var(--ind);color:#fff;padding:16px 18px;margin-bottom:12px}
 .dossier::after{content:"?";position:absolute;right:16px;top:50%;transform:translateY(-50%) rotate(-8deg);width:92px;height:92px;border-radius:50%;border:5px solid var(--red);color:var(--red);font:400 58px/80px "Dela Gothic One",Inter,sans-serif;text-align:center;background:rgba(255,255,255,.06)}
 .dossier > *{position:relative;z-index:1;max-width:calc(100% - 110px)}
@@ -89,8 +94,9 @@ ol.ladder li.fresh{box-shadow:0 0 0 2px var(--red) inset}
 </head>
 <body>
 <div class="wrap">
+  <!--GAMES--><nav class="games" aria-label="Game"><a class="shows" href="../"  data-game="shows">Shows</a><a class="chars" href="../characters/" aria-current="page" data-game="characters">Characters</a></nav><!--/GAMES-->
   <header>
-    <h1>Character Guess</h1>
+    <h1>Anime Guess</h1>
     <div class="tabs" role="group" aria-label="Mode"><button data-m="daily" aria-pressed="true">Daily</button><button data-m="endless" aria-pressed="false">Endless</button><button data-m="stats" aria-pressed="false">Stats</button></div>
   </header>
   <div id="game">
@@ -108,7 +114,7 @@ ol.ladder li.fresh{box-shadow:0 0 0 2px var(--red) inset}
     <div class="legend"><span style="--c:var(--hit)">Match</span><span style="--c:var(--near)">Close (series: same studio)</span><span style="--c:var(--miss)">No match</span><span>↑ answer debuted later / is more popular</span></div>
   </div>
   <div id="stats" hidden></div>
-  <p class="credit">Facts from <a href="https://anilist.co" target="_blank" rel="noopener">AniList</a>; trivia written for this game, spoiler-free. No artwork is used. Not affiliated with AniList or any studio. <a href="../">Play Anime Guess</a>.</p>
+  <p class="credit">Facts from <a href="https://anilist.co" target="_blank" rel="noopener">AniList</a>; trivia written for this game, spoiler-free. No artwork is used. Not affiliated with AniList or any studio.</p>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <!--DATA-->
@@ -243,6 +249,8 @@ function setMode(m) {
   if (m === 'daily') startDaily(); else if (m === 'endless') startEndless(); else renderStats();
 }
 document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => setMode(b.dataset.m));
+document.querySelectorAll('.games a').forEach(a => a.addEventListener('click', () => { try { localStorage.setItem('ag:game', a.dataset.game); } catch (e) {} }));
+try { localStorage.setItem('ag:game', 'characters'); } catch (e) {}
 
 async function boot() {
   let data = window.CHAR_DATA, tv = window.CHAR_TRIVIA;
