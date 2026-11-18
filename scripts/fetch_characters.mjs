@@ -10,14 +10,16 @@ const Q = `query ($page: Int) { Page(page: $page, perPage: 50) { pageInfo { hasN
   characters(sort: FAVOURITES_DESC) {
     id name { full native alternative } gender age dateOfBirth { month day } bloodType favourites
     description(asHtml: false)
-    media(type: ANIME, sort: POPULARITY_DESC, perPage: 8) { edges { characterRole
+    media(type: ANIME, sort: POPULARITY_DESC, perPage: 6) { edges { characterRole
       voiceActorRoles(language: JAPANESE, sort: [FAVOURITES_DESC]) { roleNotes voiceActor { name { full } } }
       node { id title { romaji english } format seasonYear startDate { year } genres popularity isAdult
         studios(isMain: true) { nodes { name } } } } } } } }`;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function page(n) {
   for (let attempt = 0; attempt < 6; attempt++) {
-    const res = await fetch('https://graphql.anilist.co', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ query: Q, variables: { page: n } }) });
+    let res;
+    try { res = await fetch('https://graphql.anilist.co', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ query: Q, variables: { page: n } }) }); }
+    catch (err) { console.error(`page ${n}: network error (${err.cause && err.cause.code || err.message}), retrying`); await sleep(8000 * (attempt + 1)); continue; }
     if (res.status === 429) { const wait = (+res.headers.get('retry-after') || 60) * 1000; console.error(`page ${n}: rate limited, waiting ${wait / 1000}s`); await sleep(wait); continue; }
     if (!res.ok) { console.error(`page ${n}: HTTP ${res.status} ${(await res.text()).slice(0, 300)}`); await sleep(5000); continue; }
     const j = await res.json(); if (j.errors) { console.error(JSON.stringify(j.errors).slice(0, 500)); await sleep(5000); continue; }
