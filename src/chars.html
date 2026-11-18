@@ -180,7 +180,7 @@ function endHtml() {
   const t = target, w = won(), p = w ? CG.score(seen()) : 0;
   return `<div class="end"><h2>${w ? `${p} point${p === 1 ? '' : 's'}` : 'Case unsolved'}</h2>
     <p><b>${esc(t[C.name])}</b> from <b>${esc(t[C.series])}</b>${t[C.va] ? `, voiced by ${esc(t[C.va])}` : ''}.</p>
-    <div class="row">${mode === 'daily' ? '<button class="primary" id="shareBtn">Copy result</button><button id="moreBtn">Play endless</button>' : '<button class="primary" id="againBtn">Next case</button>'}<a href="https://anilist.co/character/${t[C.id]}" target="_blank" rel="noopener">See them on AniList</a></div></div>`;
+    <div class="row">${mode === 'daily' ? '<button class="primary" id="shareBtn">Copy result</button><button id="moreBtn">Play endless</button>' : '<button class="primary" id="againBtn">Next case</button>'}<a href="https://anilist.co/character/${t[C.id]}" target="_blank" rel="noopener">See them on AniList</a>${t[C.vaId] ? `<a href="https://anilist.co/staff/${t[C.vaId]}" target="_blank" rel="noopener">Voice actor on AniList</a>` : ''}</div></div>`;
 }
 function bindEnd() {
   if ($('shareBtn')) $('shareBtn').onclick = () => copy(shareText());

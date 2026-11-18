@@ -26,6 +26,12 @@ for (const r of d.rows) {
     if (series.length > 3 && l.includes(series)) fail(`trivia names the show: ${r[C.name]}: ${line}`);
   }
 }
+for (const r of d.rows) {
+  const also = r[C.vaAlso] || [];
+  const tokens = r[C.name].toLowerCase().split(/\s+/).filter(t => t.length > 2);
+  if (also.some(n => n.toLowerCase().split(/\s+/).some(t => tokens.includes(t)))) fail('also-voices shares the answer\'s name: ' + r[C.name] + ' / ' + also.join(', '));
+  if (also.length && !r[C.va]) fail('also-voices without a voice actor: ' + r[C.name]);
+}
 // logic
 const [a, b] = d.rows;
 if (!CG.compare(a, a).correct) fail('self compare');

@@ -4,7 +4,7 @@
   const LAUNCH = '2026-11-17';
   const STEPS = 7; // clues on the ladder; score = 8 - clues seen when you get it
   const C = { id: 0, name: 1, alt: 2, gender: 3, age: 4, month: 5, day: 6, blood: 7, favourites: 8, rank: 9, role: 10,
-    seriesId: 11, series: 12, format: 13, year: 14, studio: 15, genres: 16, va: 17, other: 18 };
+    seriesId: 11, series: 12, format: 13, year: 14, studio: 15, genres: 16, va: 17, other: 18, vaId: 19, vaAlso: 20 };
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const FORMAT = { 'TV': 'TV series', 'TV SHORT': 'short TV series', 'MOVIE': 'film', 'ONA': 'web series', 'OVA': 'OVA', 'SPECIAL': 'special', 'MUSIC': 'music video' };
   const ROLE = { MAIN: 'Main', SUPPORTING: 'Supporting', BACKGROUND: 'Minor' };
@@ -93,7 +93,7 @@
       first,
       tv[0] || fallbackA,
       `Their best-known show is ${(t[C.genres] || []).slice(0, 3).join(', ') || 'unclassified'}${t[C.studio] ? `, made by ${t[C.studio]}` : ''}.`,
-      t[C.va] ? `Japanese voice: ${t[C.va]}.` : (f.length ? cap(f.join(', ')) + '.' : 'No voice actor is listed.'),
+      t[C.va] ? `Japanese voice: ${t[C.va]}.` + ((t[C.vaAlso] || []).length ? ` Also voices ${t[C.vaAlso].join(' and ')}.` : '') : (f.length ? cap(f.join(', ')) + '.' : 'No voice actor is listed.'),
       tv[1] || fallbackB,
       'Initials: ' + initials(t[C.name]) + '.',
       `From: ${t[C.series]}.`
