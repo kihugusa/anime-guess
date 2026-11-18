@@ -1,0 +1,18 @@
+name: Character notes (for writing trivia)
+# Manual only. Prints spoiler-stripped notes for the top characters to this run's log so trivia
+# can be written by hand into src/trivia.json. Nothing is committed or published.
+on:
+  workflow_dispatch:
+    inputs:
+      top:
+        description: 'How many top characters'
+        default: '150'
+jobs:
+  notes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/fetch_characters.mjs 4 --notes ${{ github.event.inputs.top }} > /dev/null
