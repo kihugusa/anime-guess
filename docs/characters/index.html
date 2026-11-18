@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1d2a6b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Character Guess">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<title>Character Guess</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE playful but tense daily game: a detective's case file on an anime cast
+   IDEA a screen-printed "wanted" dossier: indigo cover, vermilion stamp, clue slips revealed one by one
+   PICTURE the clue ladder itself, seven numbered slips, unrevealed ones blank
+   COLOUR paper white, ink black, deep indigo lead, vermilion stamp accent; tiles green / amber / grey
+   TYPE Dela Gothic One display + Inter
+   LAYOUT phone: dossier band with points, clue slips, search, guess cards; wide: same column */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#111216);--ink:light-dark(#141414,#f4f4f4);--mute:light-dark(#6b6d76,#a1a3ad);--line:light-dark(#e2e3e8,#2d2f37);--soft:light-dark(#f3f4f8,#1b1c22);--ind:light-dark(#1d2a6b,#3c4fb8);--red:#e8380d;--hit:light-dark(#1d9a55,#2fbf71);--near:light-dark(#e3a008,#f5b82e);--miss:light-dark(#8b8b8b,#4a4a4a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,-apple-system,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent}
+button,input{font:inherit;color:inherit}
+.wrap{max-width:820px;margin:0 auto;padding:12px max(14px,env(safe-area-inset-left,0px)) 40px max(14px,env(safe-area-inset-right,0px))}
+header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+h1{font:400 clamp(28px,8vw,40px)/1 "Dela Gothic One",Inter,sans-serif;margin:0;flex:1 1 auto}
+.tabs{display:flex;background:var(--soft);border-radius:999px;padding:3px}
+.tabs button{border:0;background:none;padding:8px 14px;border-radius:999px;font-weight:600;font-size:14px;min-height:40px;cursor:pointer}
+.tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.dossier{position:relative;overflow:hidden;border-radius:20px;background:var(--ind);color:#fff;padding:16px 18px;margin-bottom:12px}
+.dossier::after{content:"?";position:absolute;right:16px;top:50%;transform:translateY(-50%) rotate(-8deg);width:92px;height:92px;border-radius:50%;border:5px solid var(--red);color:var(--red);font:400 58px/80px "Dela Gothic One",Inter,sans-serif;text-align:center;background:rgba(255,255,255,.06)}
+.dossier > *{position:relative;z-index:1;max-width:calc(100% - 110px)}
+.dossier .num{font:400 14px "Dela Gothic One",Inter,sans-serif;opacity:.9}
+.dossier h2{font:400 clamp(22px,6vw,30px)/1.1 "Dela Gothic One",Inter,sans-serif;margin:4px 0 8px}
+.pts{display:inline-flex;align-items:baseline;gap:6px;background:rgba(255,255,255,.14);border-radius:999px;padding:4px 12px;font-weight:600;font-size:14px}
+.pts b{font:400 20px "Dela Gothic One",Inter,sans-serif}
+ol.ladder{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:6px}
+ol.ladder li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:8px;align-items:start;padding:10px 12px;border-radius:12px;background:var(--soft);font-size:15.5px;line-height:1.4}
+ol.ladder li b{font:400 16px/1.35 "Dela Gothic One",Inter,sans-serif;color:var(--ind)}
+ol.ladder li.locked{color:var(--mute);background:transparent;border:1.5px dashed var(--line)}
+ol.ladder li.locked b{color:var(--mute)}
+ol.ladder li.fresh{box-shadow:0 0 0 2px var(--red) inset}
+.actions{display:flex;gap:8px;margin-bottom:12px}
+.searchbox{position:relative;flex:1}
+.searchbox input{width:100%;font-size:17px;padding:13px 14px;border-radius:14px;border:2px solid var(--ink);background:var(--bg);min-height:52px}
+.searchbox input:focus{outline:3px solid color-mix(in srgb,var(--ind) 45%,transparent);outline-offset:1px}
+.skip{border:1.5px solid var(--line);background:var(--bg);border-radius:14px;padding:0 14px;min-height:52px;font-weight:600;cursor:pointer;white-space:nowrap}
+.sugg{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--bg);border:1.5px solid var(--line);border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.15);z-index:5;max-height:min(60vh,420px);overflow:auto;padding:4px;margin:0;list-style:none}
+.sugg li{padding:10px 12px;border-radius:10px;cursor:pointer;line-height:1.3}
+.sugg li[aria-selected=true],.sugg li:hover{background:var(--soft)}
+.sugg small{display:block;color:var(--mute);font-size:13px}
+.cards{display:grid;gap:10px}
+.gcard{border:1.5px solid var(--line);border-radius:16px;padding:12px}
+.gcard h3{font:700 16px/1.3 Inter,sans-serif;margin:0 0 8px}
+.gcard.correct{border-color:var(--hit);box-shadow:0 0 0 2px var(--hit) inset}
+.skipcard{border:1.5px dashed var(--line);border-radius:16px;padding:10px 12px;color:var(--mute);font-size:14.5px}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+@media(min-width:720px){.tiles{grid-template-columns:minmax(0,1.6fr) repeat(5,minmax(0,1fr)) minmax(0,1.4fr)}}
+.tile{border-radius:10px;padding:7px 6px;color:#fff;min-height:56px;display:flex;flex-direction:column;justify-content:space-between}
+.tile span{font-size:11.5px;font-weight:600;opacity:.92}
+.tile b{font-size:14px;line-height:1.2;overflow-wrap:anywhere}
+.tile.hit{background:var(--hit)}.tile.near{background:var(--near);color:#1a1a1a}.tile.miss{background:var(--miss)}
+.tile.wide{grid-column:span 3}
+@media(min-width:720px){.tile.wide{grid-column:auto}}
+.end{border-radius:18px;padding:18px;background:var(--soft);margin-bottom:12px}
+.end h2{font:400 26px/1.1 "Dela Gothic One",Inter,sans-serif;margin:0 0 4px}
+.end p{margin:4px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.row button,.row a{border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 14px;min-height:44px;font-weight:600;cursor:pointer;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center}
+.row .primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:6px 0 14px}
+.nums div{background:var(--soft);border-radius:14px;padding:12px 8px;text-align:center}
+.nums b{display:block;font:400 26px/1.1 "Dela Gothic One",Inter,sans-serif}
+.nums span{font-size:12.5px;color:var(--mute)}
+.dist{display:grid;gap:5px}
+.dist div{display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;align-items:center;font-size:14px}
+.dist i{display:block;height:20px;background:var(--ind);border-radius:5px;color:#fff;font-style:normal;font-size:12px;text-align:right;padding-right:6px;line-height:20px;min-width:24px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mute);margin:12px 0 0}
+.legend span::before{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+.credit{font-size:13px;color:var(--mute);margin-top:22px}
+.credit a{color:inherit}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+.toast.show{opacity:1}
+@media(prefers-reduced-motion:no-preference){.gcard.new,ol.ladder li.fresh{animation:drop .3s ease-out}@keyframes drop{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Character Guess</h1>
+    <div class="tabs" role="group" aria-label="Mode"><button data-m="daily" aria-pressed="true">Daily</button><button data-m="endless" aria-pressed="false">Endless</button><button data-m="stats" aria-pressed="false">Stats</button></div>
+  </header>
+  <div id="game">
+    <div class="dossier"><div class="num" id="dnum"></div><h2>Who is this character?</h2><span class="pts">Worth <b id="pts">7</b> points</span></div>
+    <div id="endBox"></div>
+    <ol class="ladder" id="ladder" aria-label="Clues"></ol>
+    <div class="actions" id="actions">
+      <div class="searchbox">
+        <input id="q" type="text" placeholder="Type a character name…" autocomplete="off" autocapitalize="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="sugg" aria-label="Guess a character">
+        <ul class="sugg" id="sugg" role="listbox" hidden></ul>
+      </div>
+      <button class="skip" id="skipBtn">Next clue</button>
+    </div>
+    <div class="cards" id="cards"></div>
+    <div class="legend"><span style="--c:var(--hit)">Match</span><span style="--c:var(--near)">Close (series: same studio)</span><span style="--c:var(--miss)">No match</span><span>↑ answer debuted later / is more popular</span></div>
+  </div>
+  <div id="stats" hidden></div>
+  <p class="credit">Facts from <a href="https://anilist.co" target="_blank" rel="noopener">AniList</a>; trivia written for this game, spoiler-free. No artwork is used. Not affiliated with AniList or any studio. <a href="../">Play Anime Guess</a>.</p>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>/* Character Guess — game logic (no DOM). Browser: window.CG; Node: module.exports. */
+(function (root) {
+  'use strict';
+  const LAUNCH = '2026-11-17';
+  const STEPS = 7; // clues on the ladder; score = 8 - clues seen when you get it
+  const C = { id: 0, name: 1, alt: 2, gender: 3, age: 4, month: 5, day: 6, blood: 7, favourites: 8, rank: 9, role: 10,
+    seriesId: 11, series: 12, format: 13, year: 14, studio: 15, genres: 16, va: 17, other: 18 };
+  const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const FORMAT = { 'TV': 'TV series', 'TV SHORT': 'short TV series', 'MOVIE': 'film', 'ONA': 'web series', 'OVA': 'OVA', 'SPECIAL': 'special' };
+  const ROLE = { MAIN: 'Main', SUPPORTING: 'Supporting', BACKGROUND: 'Minor' };
+
+  function dayNumber(dateStr) {
+    const p = s => Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10));
+    return Math.round((p(dateStr) - p(LAUNCH)) / 86400000) + 1;
+  }
+  // Daily answers: well-loved characters that have hand-written trivia.
+  function dailyPool(rows, trivia) {
+    const p = rows.filter(r => trivia[String(r[C.id])]);
+    return (p.length >= 7 ? p : rows.slice(0, 150)).slice().sort((a, b) => a[C.id] - b[C.id]);
+  }
+  function endlessPool(rows) { return rows.filter(r => r[C.rank] <= 600); }
+  function dailyIndex(n, day) {
+    if (n <= 1) return 0;
+    const gcd = (x, y) => (y ? gcd(y, x % y) : x);
+    let a = Math.floor(n * 0.6180339887) | 1; while (gcd(a, n) !== 1) a++;
+    const i = ((day - 1) % n + n) % n;
+    return (a * i + (15485863 % n)) % n;
+  }
+
+  const norm = s => (s || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  function search(rows, q, exclude, limit) {
+    const n = norm(q); if (n.length < 2) return [];
+    const words = n.split(' '), out = [];
+    for (const r of rows) {
+      if (exclude && exclude.has(r[C.id])) continue;
+      let s = -1;
+      for (const t of [r[C.name]].concat(r[C.alt] || []).map(norm)) {
+        if (!t) continue;
+        if (t === n) s = Math.max(s, 100);
+        else if (t.startsWith(n) || t.split(' ').some(w => w.startsWith(n))) s = Math.max(s, 80);
+        else if (words.every(w => t.includes(w))) s = Math.max(s, 50);
+      }
+      if (s >= 0) out.push([s - r[C.rank] / 1000, r]);
+    }
+    return out.sort((a, b) => b[0] - a[0]).slice(0, limit || 8).map(x => x[1]);
+  }
+
+  // Compare a guess with the answer. Tiles: hit | near | miss, with direction hints.
+  function compare(g, t) {
+    const eq = (a, b, show) => ({ s: a != null && a === b ? 'hit' : 'miss', v: a == null ? '?' : (show || (x => x))(a) });
+    const year = g[C.year] == null || t[C.year] == null ? { s: 'miss', v: g[C.year] || '?', dir: '' }
+      : g[C.year] === t[C.year] ? { s: 'hit', v: g[C.year], dir: '' }
+      : { s: Math.abs(g[C.year] - t[C.year]) <= 2 ? 'near' : 'miss', v: g[C.year], dir: t[C.year] > g[C.year] ? 'up' : 'down' };
+    // Popularity: arrow up means the answer is MORE popular (a smaller rank number).
+    const pop = g[C.rank] === t[C.rank] ? { s: 'hit', v: '#' + g[C.rank], dir: '' }
+      : { s: Math.abs(g[C.rank] - t[C.rank]) <= 25 ? 'near' : 'miss', v: '#' + g[C.rank], dir: t[C.rank] < g[C.rank] ? 'up' : 'down' };
+    let bday;
+    if (!g[C.month] || !t[C.month]) bday = { s: 'miss', v: g[C.month] ? MONTHS[g[C.month] - 1].slice(0, 3) : '?' };
+    else {
+      const d = Math.min((g[C.month] - t[C.month] + 12) % 12, (t[C.month] - g[C.month] + 12) % 12);
+      bday = { s: d === 0 ? 'hit' : d === 1 ? 'near' : 'miss', v: MONTHS[g[C.month] - 1].slice(0, 3) };
+    }
+    const series = g[C.seriesId] === t[C.seriesId] ? { s: 'hit', v: g[C.series] }
+      : { s: g[C.studio] && g[C.studio] === t[C.studio] ? 'near' : 'miss', v: g[C.series] };
+    return {
+      correct: g[C.id] === t[C.id], series,
+      gender: eq(g[C.gender], t[C.gender]), role: eq(g[C.role], t[C.role], x => ROLE[x] || x),
+      year, popularity: pop, birthday: bday, va: eq(g[C.va], t[C.va])
+    };
+  }
+
+  function facts(t) {
+    const f = [];
+    if (t[C.gender]) f.push(t[C.gender]);
+    if (t[C.age]) f.push('listed age ' + String(t[C.age]).replace(/-/g, '–'));
+    if (t[C.month]) f.push('birthday in ' + MONTHS[t[C.month] - 1]);
+    if (t[C.blood]) f.push('blood type ' + t[C.blood]);
+    return f;
+  }
+  function initials(name) {
+    const parts = name.split(/\s+/).filter(Boolean);
+    return parts.map(p => p[0].toUpperCase() + '.').join(' ') + ` (${parts.map(p => p.replace(/[^\p{L}\p{N}]/gu, '').length).join(' + ')} letters)`;
+  }
+  // The seven-step clue ladder, hardest first.
+  function clues(t, trivia) {
+    const tv = trivia[String(t[C.id])] || [], f = facts(t);
+    const role = (ROLE[t[C.role]] || 'A').toLowerCase();
+    const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+    const first = `${cap(role === 'a' ? 'a' : 'a ' + role)} character in a ${t[C.year] || 'mystery-year'} ${FORMAT[t[C.format]] || 'production'}.`;
+    const fallbackA = f.length ? cap(f.slice(0, 2).join(', ')) + '.' : 'No personal details are listed.';
+    const fallbackB = f.length > 2 ? cap(f.slice(2).join(', ')) + '.' : (t[C.other] && t[C.other].length ? `Also appears in ${t[C.other].length} other listed show${t[C.other].length > 1 ? 's' : ''}.` : 'Ranked #' + t[C.rank] + ' by fan favourites.');
+    return [
+      first,
+      tv[0] || fallbackA,
+      `Their best-known show is ${(t[C.genres] || []).slice(0, 3).join(', ') || 'unclassified'}${t[C.studio] ? `, made by ${t[C.studio]}` : ''}.`,
+      t[C.va] ? `Japanese voice: ${t[C.va]}.` : (f.length ? cap(f.join(', ')) + '.' : 'No voice actor is listed.'),
+      tv[1] || fallbackB,
+      'Initials: ' + initials(t[C.name]) + '.',
+      `From: ${t[C.series]}.`
+    ];
+  }
+  const score = cluesSeen => Math.max(0, 8 - cluesSeen);
+
+  const api = { LAUNCH, STEPS, C, MONTHS, dayNumber, dailyPool, endlessPool, dailyIndex, search, compare, clues, score, initials, norm };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.CG = api;
+})(typeof window !== 'undefined' ? window : this);
+</script>
+<script>if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js').catch(function(){})}catch(e){}}</script>
+<script>
+{
+const CG = window.CG, C = CG.C, $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, '0');
+const today = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const addDays = (s, k) => today(new Date(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10) + k));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const KEY = 'cg:v1';
+const blank = () => ({ daily: {}, dist: [0, 0, 0, 0, 0, 0, 0, 0], endless: { played: 0, points: 0 } });
+let S; try { S = Object.assign(blank(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = blank(); }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+let ROWS = [], BYID = new Map(), TRIVIA = {}, DAILY = [], ENDLESS = [];
+let mode = 'daily', target = null, steps = [], over = false, clueList = [], sel = -1, list = [];
+// steps: [{t:'guess', id} | {t:'skip'}]; clues seen = 1 + number of wrong guesses and skips
+const seen = () => Math.min(CG.STEPS, 1 + steps.filter(s => s.t === 'skip' || (s.t === 'guess' && s.id !== target[C.id])).length);
+const won = () => steps.some(s => s.t === 'guess' && s.id === target[C.id]);
+
+function startDaily() {
+  const n = CG.dayNumber(today());
+  target = DAILY[CG.dailyIndex(DAILY.length, n)];
+  const sv = S.daily[today()];
+  steps = sv ? sv.steps : []; over = !!(sv && sv.done);
+  $('dnum').textContent = `Case #${n} · ${new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}`;
+  render(false);
+}
+function startEndless() {
+  target = ENDLESS[Math.floor(Math.random() * ENDLESS.length)]; steps = []; over = false;
+  $('dnum').textContent = 'Endless case'; render(false);
+}
+function persist() { if (mode === 'daily') { S.daily[today()] = { steps, done: over, won: won(), pts: won() ? CG.score(seen()) : 0 }; save(); } }
+
+function tile(label, t, wide) {
+  const arrow = t.dir === 'up' ? ' ↑' : t.dir === 'down' ? ' ↓' : '';
+  return `<div class="tile ${t.s}${wide ? ' wide' : ''}"><span>${label}</span><b>${esc(t.v)}${arrow}${t.s === 'hit' ? ' ✓' : ''}</b></div>`;
+}
+function cardHtml(r, isNew) {
+  const c = CG.compare(r, target);
+  return `<div class="gcard${c.correct ? ' correct' : ''}${isNew ? ' new' : ''}"><h3>${esc(r[C.name])}</h3><div class="tiles">
+    ${tile('Series', c.series, true)}${tile('Gender', c.gender)}${tile('Role', c.role)}${tile('Debut', c.year)}${tile('Popularity', c.popularity)}${tile('Birthday', c.birthday)}${tile('Voice actor', c.va, true)}
+  </div></div>`;
+}
+function render(fresh) {
+  clueList = CG.clues(target, TRIVIA);
+  const n = over ? (won() ? seen() : CG.STEPS) : seen();
+  $('pts').textContent = over ? (won() ? CG.score(seen()) : 0) : CG.score(n);
+  $('ladder').innerHTML = clueList.map((c, i) => i < n || over
+    ? `<li class="${fresh && i === n - 1 && !over ? 'fresh' : ''}"><b>${i + 1}</b><span>${esc(c)}</span></li>`
+    : `<li class="locked"><b>${i + 1}</b><span>Locked. Guess wrong or tap Next clue.</span></li>`).join('');
+  $('cards').innerHTML = steps.slice().reverse().map((s, i) => s.t === 'skip'
+    ? `<div class="skipcard">Skipped to the next clue</div>`
+    : cardHtml(BYID.get(s.id), fresh && i === 0)).join('');
+  $('actions').hidden = over;
+  $('skipBtn').disabled = n >= CG.STEPS;
+  $('endBox').innerHTML = over ? endHtml() : '';
+  if (over) bindEnd();
+}
+function endHtml() {
+  const t = target, w = won(), p = w ? CG.score(seen()) : 0;
+  return `<div class="end"><h2>${w ? `${p} point${p === 1 ? '' : 's'}` : 'Case unsolved'}</h2>
+    <p><b>${esc(t[C.name])}</b> from <b>${esc(t[C.series])}</b>${t[C.va] ? `, voiced by ${esc(t[C.va])}` : ''}.</p>
+    <div class="row">${mode === 'daily' ? '<button class="primary" id="shareBtn">Copy result</button><button id="moreBtn">Play endless</button>' : '<button class="primary" id="againBtn">Next case</button>'}<a href="https://anilist.co/character/${t[C.id]}" target="_blank" rel="noopener">See them on AniList</a></div></div>`;
+}
+function bindEnd() {
+  if ($('shareBtn')) $('shareBtn').onclick = () => copy(shareText());
+  if ($('moreBtn')) $('moreBtn').onclick = () => setMode('endless');
+  if ($('againBtn')) $('againBtn').onclick = startEndless;
+}
+function shareText() {
+  const marks = steps.map(s => s.t === 'skip' ? '⬜' : s.id === target[C.id] ? '🟩' : '🟥').join('');
+  return `Character Guess #${CG.dayNumber(today())} ${won() ? CG.score(seen()) : 0}/7\n${marks}`;
+}
+async function copy(t) {
+  try { await navigator.clipboard.writeText(t); toast('Copied'); }
+  catch (e) { const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); toast('Copied'); } catch (e2) { toast('Copy not available here'); } a.remove(); }
+}
+let tt; function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 1800); }
+
+function finish() {
+  over = true;
+  if (mode === 'daily') { S.dist[won() ? CG.score(seen()) : 0]++; }
+  else { S.endless.played++; S.endless.points += won() ? CG.score(seen()) : 0; }
+}
+function guess(r) {
+  if (over || !r || steps.some(s => s.t === 'guess' && s.id === r[C.id])) return;
+  const before = seen();
+  steps.push({ t: 'guess', id: r[C.id] });
+  if (r[C.id] === target[C.id] || before >= CG.STEPS) finish();
+  persist(); save(); $('q').value = ''; closeSugg(); render(true);
+  if (!over) $('q').focus();
+}
+function skip() {
+  if (over || seen() >= CG.STEPS) return;
+  steps.push({ t: 'skip' }); persist(); render(true);
+}
+
+function openSugg() {
+  const ex = new Set(steps.filter(s => s.t === 'guess').map(s => s.id));
+  list = CG.search(ROWS, $('q').value, ex, 8); sel = list.length ? 0 : -1;
+  if (!list.length) return closeSugg();
+  $('sugg').innerHTML = list.map((r, i) => `<li role="option" id="opt${i}" data-i="${i}" aria-selected="${i === sel}">${esc(r[C.name])}<small>${esc(r[C.series])}</small></li>`).join('');
+  $('sugg').hidden = false; $('q').setAttribute('aria-expanded', 'true');
+}
+function closeSugg() { $('sugg').hidden = true; $('q').setAttribute('aria-expanded', 'false'); }
+function moveSel(d) { if (!list.length) return; sel = (sel + d + list.length) % list.length; $('sugg').querySelectorAll('li').forEach((li, i) => li.setAttribute('aria-selected', i === sel)); $('opt' + sel).scrollIntoView({ block: 'nearest' }); }
+$('q').addEventListener('input', openSugg);
+$('q').addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown') { e.preventDefault(); moveSel(1); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); moveSel(-1); }
+  else if (e.key === 'Enter') { e.preventDefault(); if (sel >= 0) guess(list[sel]); }
+  else if (e.key === 'Escape') closeSugg();
+});
+$('sugg').addEventListener('mousedown', e => { const li = e.target.closest('li'); if (li) { e.preventDefault(); guess(list[+li.dataset.i]); } });
+document.addEventListener('click', e => { if (!e.target.closest('.searchbox')) closeSugg(); });
+$('skipBtn').onclick = skip;
+
+function streak() { let d = today(), n = 0; if (!(S.daily[d] && S.daily[d].won)) d = addDays(d, -1); while (S.daily[d] && S.daily[d].won) { n++; d = addDays(d, -1); } return n; }
+function renderStats() {
+  const days = Object.values(S.daily).filter(x => x.done), pts = days.reduce((a, x) => a + (x.pts || 0), 0);
+  const max = Math.max(1, ...S.dist);
+  $('stats').innerHTML = `<div class="nums"><div><b>${days.length}</b><span>Cases</span></div><div><b>${days.length ? (pts / days.length).toFixed(1) : '0'}</b><span>Avg points</span></div><div><b>${streak()}</b><span>Streak</span></div><div><b>${S.endless.points}</b><span>Endless pts</span></div></div>
+    <h2 style="font:400 22px 'Dela Gothic One',Inter,sans-serif;margin:8px 0">Daily points</h2>
+    <div class="dist">${[7, 6, 5, 4, 3, 2, 1, 0].map(p => `<div><span>${p ? p + ' pts' : 'Missed'}</span><i style="width:${Math.max(6, 100 * S.dist[p] / max)}%">${S.dist[p]}</i></div>`).join('')}</div>`;
+}
+function setMode(m) {
+  mode = m; document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === m));
+  $('game').hidden = m === 'stats'; $('stats').hidden = m !== 'stats';
+  if (m === 'daily') startDaily(); else if (m === 'endless') startEndless(); else renderStats();
+}
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => setMode(b.dataset.m));
+
+async function boot() {
+  let data = window.CHAR_DATA, tv = window.CHAR_TRIVIA;
+  try {
+    if (!data) data = await (await fetch('characters.json')).json();
+    if (!tv) tv = await (await fetch('trivia.json')).json();
+  } catch (e) { $('dnum').textContent = 'Could not load data. Check your connection.'; return; }
+  ROWS = data.rows; TRIVIA = tv.trivia || {}; ROWS.forEach(r => BYID.set(r[C.id], r));
+  DAILY = CG.dailyPool(ROWS, TRIVIA); ENDLESS = CG.endlessPool(ROWS);
+  const hot = window.claude && window.claude.hot;
+  const start = d => setMode(d && ['daily', 'endless', 'stats'].includes(d.mode) ? d.mode : 'daily');
+  if (hot && hot.snapshot) hot.snapshot(() => ({ mode }));
+  if (hot && hot.ready) hot.ready(start); else start(hot && hot.data);
+}
+window.__cg = () => ({ id: target && target[C.id], name: target && target[C.name], seen: target ? seen() : 0, over, mode });
+boot();
+}
+</script>
+</body>
+</html>
