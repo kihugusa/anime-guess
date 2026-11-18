@@ -126,7 +126,7 @@ ol.ladder li.fresh{box-shadow:0 0 0 2px var(--red) inset}
   const LAUNCH = '2026-11-17';
   const STEPS = 7; // clues on the ladder; score = 8 - clues seen when you get it
   const C = { id: 0, name: 1, alt: 2, gender: 3, age: 4, month: 5, day: 6, blood: 7, favourites: 8, rank: 9, role: 10,
-    seriesId: 11, series: 12, format: 13, year: 14, studio: 15, genres: 16, va: 17, other: 18 };
+    seriesId: 11, series: 12, format: 13, year: 14, studio: 15, genres: 16, va: 17, other: 18, vaId: 19, vaAlso: 20 };
   const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const FORMAT = { 'TV': 'TV series', 'TV SHORT': 'short TV series', 'MOVIE': 'film', 'ONA': 'web series', 'OVA': 'OVA', 'SPECIAL': 'special', 'MUSIC': 'music video' };
   const ROLE = { MAIN: 'Main', SUPPORTING: 'Supporting', BACKGROUND: 'Minor' };
@@ -215,7 +215,7 @@ ol.ladder li.fresh{box-shadow:0 0 0 2px var(--red) inset}
       first,
       tv[0] || fallbackA,
       `Their best-known show is ${(t[C.genres] || []).slice(0, 3).join(', ') || 'unclassified'}${t[C.studio] ? `, made by ${t[C.studio]}` : ''}.`,
-      t[C.va] ? `Japanese voice: ${t[C.va]}.` : (f.length ? cap(f.join(', ')) + '.' : 'No voice actor is listed.'),
+      t[C.va] ? `Japanese voice: ${t[C.va]}.` + ((t[C.vaAlso] || []).length ? ` Also voices ${t[C.vaAlso].join(' and ')}.` : '') : (f.length ? cap(f.join(', ')) + '.' : 'No voice actor is listed.'),
       tv[1] || fallbackB,
       'Initials: ' + initials(t[C.name]) + '.',
       `From: ${t[C.series]}.`
@@ -289,7 +289,7 @@ function endHtml() {
   const t = target, w = won(), p = w ? CG.score(seen()) : 0;
   return `<div class="end"><h2>${w ? `${p} point${p === 1 ? '' : 's'}` : 'Case unsolved'}</h2>
     <p><b>${esc(t[C.name])}</b> from <b>${esc(t[C.series])}</b>${t[C.va] ? `, voiced by ${esc(t[C.va])}` : ''}.</p>
-    <div class="row">${mode === 'daily' ? '<button class="primary" id="shareBtn">Copy result</button><button id="moreBtn">Play endless</button>' : '<button class="primary" id="againBtn">Next case</button>'}<a href="https://anilist.co/character/${t[C.id]}" target="_blank" rel="noopener">See them on AniList</a></div></div>`;
+    <div class="row">${mode === 'daily' ? '<button class="primary" id="shareBtn">Copy result</button><button id="moreBtn">Play endless</button>' : '<button class="primary" id="againBtn">Next case</button>'}<a href="https://anilist.co/character/${t[C.id]}" target="_blank" rel="noopener">See them on AniList</a>${t[C.vaId] ? `<a href="https://anilist.co/staff/${t[C.vaId]}" target="_blank" rel="noopener">Voice actor on AniList</a>` : ''}</div></div>`;
 }
 function bindEnd() {
   if ($('shareBtn')) $('shareBtn').onclick = () => copy(shareText());
