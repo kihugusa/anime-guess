@@ -11,7 +11,7 @@ const Q = `query ($page: Int) { Page(page: $page, perPage: 50) { pageInfo { hasN
     id name { full native alternative } gender age dateOfBirth { month day } bloodType favourites
     description(asHtml: false)
     media(type: ANIME, sort: POPULARITY_DESC, perPage: 8) { edges { characterRole
-      voiceActors(language: JAPANESE, sort: RELEVANCE) { name { full } }
+      voiceActorRoles(language: JAPANESE, sort: [FAVOURITES_DESC]) { roleNotes voiceActor { name { full } } }
       node { id title { romaji english } format seasonYear startDate { year } genres popularity isAdult
         studios(isMain: true) { nodes { name } } } } } } } }`;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -41,7 +41,10 @@ for (let n = 1; n <= PAGES; n++) {
     const e = edges[0], m = e.node;
     const year = m.seasonYear || (m.startDate && m.startDate.year) || null;
     rank++;
-    const va = (e.voiceActors && e.voiceActors[0] && e.voiceActors[0].name.full) || null;
+    // Main voice: skip child/young/past-version roles, prefer the most-favourited actor.
+    const roles = (e.voiceActorRoles || []).filter(v => v.voiceActor);
+    const adult = roles.filter(v => !/child|young|kid|past|teen|baby|boy|girl|\(/i.test(v.roleNotes || ''));
+    const va = ((adult[0] || roles[0] || {}).voiceActor || { name: {} }).name.full || null;
     const series = m.title.english || m.title.romaji;
     rows.push([c.id, c.name.full, (c.name.alternative || []).filter(Boolean).slice(0, 4), c.gender || null, c.age || null,
       c.dateOfBirth && c.dateOfBirth.month || null, c.dateOfBirth && c.dateOfBirth.day || null, c.bloodType || null,
